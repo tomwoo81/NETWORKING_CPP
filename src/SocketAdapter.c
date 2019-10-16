@@ -128,6 +128,8 @@ S32 OpenAndConfigSocket(const U32 ipVer, const S32 socketType, const U32 flag, c
 		}
 	}
 
+	LOG_INFO(MODULE_ID_SOCKET, "Open and configure a socket (socket ID: %d) successfully.\n", socketId);
+
 	return socketId;
 }
 
@@ -147,6 +149,8 @@ STATUS CloseSocket(const S32 socketId)
 		return STATUS_ERR;
 	}
 
+	LOG_INFO(MODULE_ID_SOCKET, "Close the socket (socket ID: %d) successfully.\n", socketId);
+
 	return STATUS_OK;
 }
 
@@ -165,6 +169,8 @@ STATUS ShutdownSocket(const S32 socketId, const S32 how)
 		LOG_ERROR(MODULE_ID_SOCKET, "Fail to shutdown the socket (socket ID: %d)! (errNo = [-%d][%s])\n", socketId, errno, strerror(errno));
 		return STATUS_ERR;
 	}
+
+	LOG_INFO(MODULE_ID_SOCKET, "Shutdown the socket (socket ID: %d) by action (%d) successfully.\n", socketId, how);
 
 	return STATUS_OK;
 }
@@ -194,6 +200,8 @@ STATUS SetFlagToSocket(const S32 socketId, const U32 flag)
 		LOG_ERROR(MODULE_ID_SOCKET, "Fail to set flags to the socket! (errNo = [-%d][%s])\n", errno, strerror(errno));
 		return STATUS_ERR;
 	}
+
+	LOG_INFO(MODULE_ID_SOCKET, "Set a flag (%#X) to the socket (socket ID: %d) successfully.\n", flag, socketId);
 
 	return STATUS_OK;
 }
@@ -255,6 +263,8 @@ STATUS ConfigSocketWithAddrAndPort(const S32 socketId, const U32 ipVer, const ch
 		return STATUS_ERR;
 	}
 
+	LOG_INFO(MODULE_ID_SOCKET, "Configure the socket (socket ID: %d) with address and port successfully.\n", socketId);
+
 	return STATUS_OK;
 }
 
@@ -275,6 +285,8 @@ STATUS ConfigSocketWithTos(const S32 socketId, const U8 tos)
 		LOG_ERROR(MODULE_ID_SOCKET, "Fail to set TOS of the socket! (errNo = [-%d][%s])\n", errno, strerror(errno));
 		return STATUS_ERR;
 	}
+
+	LOG_INFO(MODULE_ID_SOCKET, "Configure the socket (socket ID: %d) with TOS (%u) successfully.\n", socketId, tos);
 
 	return STATUS_OK;
 }
@@ -415,13 +427,12 @@ S32 AcceptTcpClient(const S32 listenSockId, S_IpAddr* const pIpAddr, U16* const 
 
 		*pPortNumber = ntohs(*pPort);
 
-		LOG_INFO(MODULE_ID_SOCKET, "A TCP client (IP Address: %s, Port Number: %u) accepted.\n", inet_ntop(sAddr.ss_family, pAddr, addrStr, INET6_ADDRSTRLEN), ntohs(*pPort));
+		LOG_INFO(MODULE_ID_SOCKET, "A TCP client (socket ID: %d, IP Address: %s, Port Number: %u) accepted.\n", connSockId, inet_ntop(sAddr.ss_family, pAddr, addrStr, INET6_ADDRSTRLEN), ntohs(*pPort));
 	}
 
 	return connSockId;
 }
 
-#if 0
 /******************************************************************************
   Function:     IsTcpSocketConnected()
   Description:  .
@@ -459,7 +470,6 @@ STATUS IsTcpSocketConnected(const S32 socketId, bool* const pConnected)
 
 	return STATUS_OK;
 }
-#endif
 
 /******************************************************************************
   Function:     RecvFromTcpSocket()

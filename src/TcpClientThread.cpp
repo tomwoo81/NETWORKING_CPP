@@ -12,7 +12,7 @@ void TcpClientThreadRun(TcpClientThread* const pThread)
 {
 	std::cout << "[Info] " << "TcpClientThread - enter" << std::endl;
 
-	if (NULL == pThread)
+	if (nullptr == pThread)
 	{
 		std::cout << "[Err] " << "Pointer to the instance of TcpClientThread is NULL!" << std::endl;
 		std::cout << "[Info] " << "TcpClientThread - exit" << std::endl;
@@ -109,11 +109,6 @@ void TcpClientThread::run()
 
 		std::this_thread::sleep_for(std::chrono::seconds(TCP_CLIENT_TX_MSG_INTERVAL));
 	}
-
-	/* Close the TCP Client Socket. */
-	socket.close();
-//	InfoLog(<<"Close the TCP Client Socket.");
-	std::cout << "[Info] " << "Close the TCP Client Socket (port: " << mLocalPortNumber << ")." << std::endl;
 
 //	InfoLog(<<"TcpClientThread exit.");
 //	std::cout << "[Info] " << "TcpClientThread exit." << std::endl;

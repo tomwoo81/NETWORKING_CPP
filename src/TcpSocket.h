@@ -8,9 +8,7 @@ public:
 	TcpSocketIf();
 	virtual ~TcpSocketIf();
 
-#if 0
 	STATUS isConnected(bool& connected);
-#endif
 	S32 recv(void* const pBuffer, const U32 bufLen, const S32 flags);
 	S32 send(const void* const pData, const U32 dataLen, const S32 flags);
 

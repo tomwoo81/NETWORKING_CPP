@@ -2,9 +2,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <pthread.h>
 #include "MacroDefs.h"
 #include "CommonTypes.h"
+#include "IpAddr.h"
 #include "TcpServerListenThread.h"
 #include "TcpClientThread.h"
 
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 		std::cout << "[Info] " << "Main process - exit" << std::endl;
 		exit(STATUS_ERR);
 	}
-	else if(0 == pid)
+	else if (0 == pid)
 	{
 		/* Child process for TCP server */
 		std::cout << "[Info] " << "Child process for TCP server - enter" << std::endl;
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
 		std::this_thread::sleep_for(std::chrono::seconds(TCP_SERVER_RUNNING_DURATION));
 
-		pthread_kill(pTcpServerListenThread->native_handle(), SIGTERM);
+		pTcpServerListenThread->shutdown();
 		pTcpServerListenThread->join();
 		delete pTcpServerListenThread;
 
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 		}
 
 		/* Wait for shutdown of all child processes. */
-		while(STATUS_ERR != wait(NULL))
+		while (STATUS_ERR != wait(NULL))
 		{
 			;
 		}

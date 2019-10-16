@@ -14,6 +14,7 @@ public:
 			const U32 sndBufLen, const std::string& ipAddrStr, const U16 portNumber);
 	STATUS close();
 	STATUS shutdown(const S32 how);
+	void reset();
 	STATUS setFlag(const U32 flag);
 	STATUS configWithAddrAndPort(const U32 ipVer, const std::string& ipAddrStr, const U16 portNumber);
 	STATUS configWithTos(const U8 tos);

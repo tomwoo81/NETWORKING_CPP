@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fcntl.h>
 //#include "rutil/Logger.hxx"
 #include "MacroDefs.h"
 #include "TcpServerConnTask.h"
@@ -18,38 +19,53 @@ void TcpServerConnTask::run()
 {
 	std::cout << "[Info] " << "TcpServerConnTask - enter" << std::endl;
 
+	bool connected;
 	S32 ret;
 	U8 rxBuffer[TCP_SERVER_TASK_BUFFER_LENGTH];
 	std::string rxMsg, txMsg;
 
-	mSocket.setFlag(0); //blocking I/O
+	mSocket.setFlag(O_NONBLOCK); //Non-blocking I/O
 
-	while (1)
+	while (!mpThreadPool->isShutdown())
 	{
-		ret = mSocket.recv(rxBuffer, TCP_SERVER_TASK_BUFFER_LENGTH, 0);
-		if (ret <= 0)
+		mSleep(10); //Wait for 10 ms.
+
+		/* Check whether the TCP connection exists. */
+		ret = mSocket.isConnected(connected);
+		if ((STATUS_OK == ret) && !connected)
 		{
-			/* No received message. */
+//			InfoLog(<<"A TCP connection is shutdown.");
+			std::cout << "[Info] " << "A TCP connection is shutdown." << std::endl;
 			break;
 		}
-		else
+
+		while (1)
 		{
-			/* A received message. */
-
-			rxMsg.assign((char*)rxBuffer, ret);
-			std::cout << "[Info] " << "TCP Server Rx [" << ret << " bytes]" << std::endl;
-			std::cout << "[Info] " << "TCP Server Rx: " << rxMsg << std::endl;
-
-			/* Send a message. */
-			txMsg.assign(TCP_SERVER_TX_MSG);
-			ret = mSocket.send(txMsg.c_str(), txMsg.length(), 0);
-			if (ret != (S32)txMsg.length())
+			ret = mSocket.recv(rxBuffer, TCP_SERVER_TASK_BUFFER_LENGTH, 0);
+			if (ret <= 0)
 			{
-//				WarningLog(<<"Fail to send a message to a TCP client!");
-				std::cout << "[Warn] " << "Fail to send a message to a TCP client!" << std::endl;
-				continue;
+				/* No received message. */
+				break;
 			}
-			std::cout << "[Info] " << "TCP Server Tx [" << ret << " bytes]" << std::endl;
+			else
+			{
+				/* A received message. */
+
+				rxMsg.assign((char*)rxBuffer, ret);
+				std::cout << "[Info] " << "TCP Server Rx [" << std::dec << ret << " bytes]" << std::endl;
+				std::cout << "[Info] " << "TCP Server Rx: " << rxMsg << std::endl;
+
+				/* Send a message. */
+				txMsg.assign(TCP_SERVER_TX_MSG);
+				ret = mSocket.send(txMsg.c_str(), txMsg.length(), 0);
+				if (ret != (S32)txMsg.length())
+				{
+	//				WarningLog(<<"Fail to send a message to a TCP client!");
+					std::cout << "[Warn] " << "Fail to send a message to a TCP client!" << std::endl;
+					continue;
+				}
+				std::cout << "[Info] " << "TCP Server Tx [" << std::dec << ret << " bytes]" << std::endl;
+			}
 		}
 	}
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #define TCP_SERVER_IP_ADDR "127.0.0.1" //Loopback Address
-#define TCP_SERVER_PORT_NUMBER 80
+#define TCP_SERVER_PORT_NUMBER 8888
 #define TCP_CONNECTIONS_MAX_NUM 5
 #define THREAD_POOL_NUM_THREADS 3
 #define TCP_SERVER_TX_MSG "Response from TCP Server to TCP Client"

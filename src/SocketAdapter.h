@@ -38,9 +38,7 @@ STATUS ConnectTcpServer(const S32 socketId, const U32 ipVer, const char* const p
 
 S32 AcceptTcpClient(const S32 listenSockId, S_IpAddr* const pIpAddr, U16* const pPortNumber);
 
-#if 0
 STATUS IsTcpSocketConnected(const S32 socketId, bool* const pConnected);
-#endif
 
 S32 RecvFromTcpSocket(const S32 socketId, void* const pBuffer, const U32 bufLen, const S32 flags);
 

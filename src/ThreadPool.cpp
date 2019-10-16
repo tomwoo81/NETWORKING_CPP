@@ -1,15 +1,15 @@
 //#include "rutil/Logger.hxx"
 #include <iostream>
-#include <pthread.h>
+#include <iomanip>
 #include "ThreadPool.h"
 
 PoolTaskIf::PoolTaskIf()
-: mpThreadPool(NULL)
+: mpThreadPool(nullptr)
 {
 }
 
 PoolTaskIf::PoolTaskIf(const std::string& taskNameStr)
-: mTaskNameStr(taskNameStr), mpThreadPool(NULL)
+: mTaskNameStr(taskNameStr), mpThreadPool(nullptr)
 {
 }
 
@@ -32,7 +32,7 @@ void PoolThreadRun(PoolThread* const pThread)
 {
 	std::cout << "[Info] " << "PoolThread - enter" << std::endl;
 
-	if (NULL == pThread)
+	if (nullptr == pThread)
 	{
 		std::cout << "[Err] " << "Pointer to the instance of PoolThread is NULL!" << std::endl;
 		std::cout << "[Info] " << "PoolThread - exit" << std::endl;
@@ -45,16 +45,16 @@ void PoolThreadRun(PoolThread* const pThread)
 }
 
 PoolThread::PoolThread(ThreadPool* const pThreadPool)
-: mpThreadPool(pThreadPool), mpTask(NULL)
+: mpThreadPool(pThreadPool), mpTask(nullptr)
 {
 }
 
 PoolThread::~PoolThread()
 {
-	if (NULL != mpTask)
+	if (nullptr != mpTask)
 	{
 		delete mpTask;
-		mpTask = NULL;
+		mpTask = nullptr;
 	}
 }
 
@@ -79,18 +79,21 @@ void PoolThread::run()
 	{
 		if (mpThreadPool->getTask(mpTask))
 		{
-//			InfoLog(<<"Thread "<<tid<<" will be busy.");
-			std::cout << "[Info] " << "Thread " << tid << " will be busy." << std::endl;
-			mpTask->run();
-			delete mpTask; //Delete a task.
-			mpTask = NULL;
-//			InfoLog(<<"Thread "<<tid<<" will be idle.");
-			std::cout << "[Info] " << "Thread " << tid << " will be idle." << std::endl;
+			if (nullptr != mpTask)
+			{
+//				InfoLog(<<"Thread "<<tid<<" will be busy.");
+				std::cout << "[Info] " << "Thread " << std::setiosflags(std::ios::showbase | std::ios::uppercase) << std::hex << tid << " will be busy." << std::endl;
+				mpTask->run();
+				delete mpTask; //Delete a task.
+				mpTask = nullptr;
+//				InfoLog(<<"Thread "<<tid<<" will be idle.");
+				std::cout << "[Info] " << "Thread " << std::setiosflags(std::ios::showbase | std::ios::uppercase) << std::hex << tid << " will be idle." << std::endl;
+			}
 		}
 		else
 		{
 //			InfoLog(<<"Thread "<<tid<<" will exit.");
-			std::cout << "[Info] " << "Thread " << tid << " will exit." << std::endl;
+			std::cout << "[Info] " << "Thread " << std::setiosflags(std::ios::showbase | std::ios::uppercase) << std::hex << tid << " will exit." << std::endl;
 			break;
 		}
 	}
@@ -98,6 +101,7 @@ void PoolThread::run()
 
 
 ThreadPool::ThreadPool(const U32 numThreads)
+: mShutdown(false)
 {
 	if (STATUS_ERR == createAll(numThreads))
 	{
@@ -111,6 +115,7 @@ ThreadPool::ThreadPool(const U32 numThreads)
 ThreadPool::~ThreadPool()
 {
 	shutdownAll();
+	joinAll();
 }
 
 void ThreadPool::addTask(PoolTaskIf* const pTask)
@@ -126,9 +131,14 @@ bool ThreadPool::getTask(PoolTaskIf*& pTask)
 {
 	std::unique_lock<std::mutex> lock(mMutex);
 
-	while ((0 == mTaskVec.size()))
+	while ((0 == mTaskVec.size()) && (!mShutdown))
 	{
 		mCondition.wait(lock);
+	}
+
+	if (mShutdown)
+	{
+		return false;
 	}
 
 	std::vector<PoolTaskIf*>::iterator iter = mTaskVec.begin();
@@ -137,27 +147,44 @@ bool ThreadPool::getTask(PoolTaskIf*& pTask)
 		pTask = *iter;
 		mTaskVec.erase(iter);
 	}
+	else
+	{
+		pTask = nullptr;
+	}
 
 	return true;
+}
+
+bool ThreadPool::isShutdown()
+{
+	std::unique_lock<std::mutex> lock(mMutex);
+
+	return mShutdown;
 }
 
 void ThreadPool::shutdownAll()
 {
 	std::unique_lock<std::mutex> lock(mMutex);
 
+	if (!mShutdown)
+	{
+//		InfoLog(<<"To shutdown all threads in this Thread Pool.");
+		std::cout << "[Info] " << "To shutdown all threads in this Thread Pool." << std::endl;
+
+		mShutdown = true;
+		mCondition.notify_all();
+	}
+}
+
+void ThreadPool::joinAll()
+{
 	for (auto p: mThreadVec)
 	{
-		pthread_kill(p->native_handle(), SIGTERM);
 		p->join();
 		delete p;
 	}
-	mThreadVec.clear();
 
-	for (auto p: mTaskVec)
-	{
-		delete p;
-	}
-	mTaskVec.clear();
+	mThreadVec.clear();
 }
 
 U32 ThreadPool::getPendingTaskNum() const

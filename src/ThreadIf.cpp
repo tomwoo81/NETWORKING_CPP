@@ -2,33 +2,22 @@
 #include "ThreadIf.h"
 
 ThreadIf::ThreadIf()
-: mpThread(NULL)
+: mpThread(nullptr)
 {
 }
 
 ThreadIf::~ThreadIf()
 {
-	if (NULL != mpThread)
+	if (nullptr != mpThread)
 	{
 		delete mpThread;
-		mpThread = NULL;
+		mpThread = nullptr;
 	}
-}
-
-std::thread::native_handle_type ThreadIf::native_handle()
-{
-	if (NULL == mpThread)
-	{
-		std::cout << "[Err] " << "Pointer to the thread is NULL!" << std::endl;
-		return NULL;
-	}
-
-	return mpThread->native_handle();
 }
 
 void ThreadIf::join()
 {
-	if (NULL == mpThread)
+	if (nullptr == mpThread)
 	{
 		std::cout << "[Err] " << "Pointer to the thread is NULL!" << std::endl;
 		return;

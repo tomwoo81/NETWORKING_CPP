@@ -48,15 +48,17 @@ public:
 
 	void addTask(PoolTaskIf* const pTask);
 	bool getTask(PoolTaskIf*& pTask);
+	bool isShutdown();
 	void shutdownAll();
+	void joinAll();
 	U32 getPendingTaskNum() const;
 
 private:
 	STATUS createAll(const U32 numThreads);
 
 	std::vector<PoolThread*> mThreadVec;
-
 	std::vector<PoolTaskIf*> mTaskVec;
+	bool mShutdown;
 	mutable std::mutex mMutex;
 	mutable std::condition_variable mCondition;
 };

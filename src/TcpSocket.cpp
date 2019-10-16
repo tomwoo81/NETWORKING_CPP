@@ -14,12 +14,10 @@ TcpSocketIf::~TcpSocketIf()
 {
 }
 
-#if 0
 STATUS TcpSocketIf::isConnected(bool& connected)
 {
 	return IsTcpSocketConnected(mSocketId, &connected);
 }
-#endif
 
 S32 TcpSocketIf::recv(void* const pBuffer, const U32 bufLen, const S32 flags)
 {

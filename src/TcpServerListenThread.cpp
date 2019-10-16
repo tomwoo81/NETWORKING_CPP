@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fcntl.h>
 //#include "rutil/Logger.hxx"
 #include "MacroDefs.h"
 #include "TcpSocket.h"
@@ -11,7 +12,7 @@ void TcpServerListenThreadRun(TcpServerListenThread* const pThread)
 {
 	std::cout << "[Info] " << "TcpServerListenThread - enter" << std::endl;
 
-	if (NULL == pThread)
+	if (nullptr == pThread)
 	{
 		std::cout << "[Err] " << "Pointer to the instance of TcpServerListenThread is NULL!" << std::endl;
 		std::cout << "[Info] " << "TcpServerListenThread - exit" << std::endl;
@@ -24,27 +25,12 @@ void TcpServerListenThreadRun(TcpServerListenThread* const pThread)
 }
 
 TcpServerListenThread::TcpServerListenThread(const U32 ipVer, const std::string& localIpAddrStr, const U16 localPortNumber)
-: mIpVer(ipVer), mLocalIpAddrStr(localIpAddrStr), mLocalPortNumber(localPortNumber)
+: mIpVer(ipVer), mLocalIpAddrStr(localIpAddrStr), mLocalPortNumber(localPortNumber), mShutdown(false)
 {
-	try
-	{
-		mpThreadPool = new ThreadPool(THREAD_POOL_NUM_THREADS);
-	}
-	catch (const std::bad_alloc& e)
-	{
-//		ErrLog(<<"Fail to create a Thread Pool!");
-		std::cout << "[Err] " << "Fail to create a Thread Pool!" << std::endl;
-		return;
-	}
 }
 
 TcpServerListenThread::~TcpServerListenThread()
 {
-	if (NULL != mpThreadPool)
-	{
-		delete mpThreadPool;
-		mpThreadPool = NULL;
-	}
 }
 
 void TcpServerListenThread::start()
@@ -68,13 +54,16 @@ void TcpServerListenThread::run()
 	S32 ret;
 	S_IpAddr sIpAddr;
 	U16 portNumber;
+	TcpServerSocket listenTcpServerSocket;
 	TcpServerSocket connTcpServerSocket;
 	TcpServerConnTask* pTask;
 
+	ThreadPool threadPool(THREAD_POOL_NUM_THREADS);
+
 	/* Open a TCP Server Socket for listening. */
-	ret = mListenTcpServerSocket.openAndConfig(mIpVer, 0,
+	ret = listenTcpServerSocket.openAndConfig(mIpVer, O_NONBLOCK,
 			TCP_SERVER_THREAD_BUFFER_LENGTH, TCP_SERVER_THREAD_BUFFER_LENGTH,
-			"", 0); //blocking I/O
+			"", 0); //Non-blocking I/O
 	if (STATUS_ERR == ret)
 	{
 //		ErrLog(<<"Fail to open a TCP Server Socket for listening!");
@@ -83,7 +72,7 @@ void TcpServerListenThread::run()
 	}
 
 	/* Configure a TCP Server Socket for listening with addr and port. */
-	ret = mListenTcpServerSocket.configWithAddrAndPort(mIpVer, mLocalIpAddrStr, mLocalPortNumber);
+	ret = listenTcpServerSocket.configWithAddrAndPort(mIpVer, mLocalIpAddrStr, mLocalPortNumber);
 	if (STATUS_ERR == ret)
 	{
 //		ErrLog(<<"Fail to configure a TCP Server Socket for listening with addr and port!");
@@ -92,7 +81,7 @@ void TcpServerListenThread::run()
 	}
 
 	/* Transfer to Listen state on TCP server. */
-	ret = mListenTcpServerSocket.listen(TCP_CONNECTIONS_MAX_NUM);
+	ret = listenTcpServerSocket.listen(TCP_CONNECTIONS_MAX_NUM);
 	if (STATUS_ERR == ret)
 	{
 //		ErrLog(<<"Fail to transfer to Listen state on TCP server!");
@@ -100,40 +89,78 @@ void TcpServerListenThread::run()
 		return;
 	}
 
-	while (1)
+	while (!waitForShutdown(10)) //Wait for 10 ms.
 	{
-		/* Accept TCP client. */
-		ret = mListenTcpServerSocket.accept(sIpAddr, portNumber, connTcpServerSocket);
-		if (STATUS_ERR == ret)
+		while (1)
 		{
-			/* No new TCP connection. */
-			continue;
-		}
-		else
-		{
-			/* A new TCP connection. */
-			try
+			/* Accept TCP client. */
+			ret = listenTcpServerSocket.accept(sIpAddr, portNumber, connTcpServerSocket);
+			if (STATUS_ERR == ret)
 			{
-				/* Create a TCP Server Connection Task. */
-				pTask = new TcpServerConnTask(connTcpServerSocket);
+				/* No new TCP connection. */
+				break;
 			}
-			catch (const std::bad_alloc& e)
+			else
 			{
-//				ErrLog(<<"Fail to create an HTTP Server Connection Task!");
-				std::cout << "[Err] " << "Fail to create an HTTP Server Connection Task!" << std::endl;
-				connTcpServerSocket.close();
-				continue;
-			}
+				/* A new TCP connection. */
+				try
+				{
+					/* Create a TCP Server Connection Task. */
+					pTask = new TcpServerConnTask(connTcpServerSocket);
+					connTcpServerSocket.reset();
+				}
+				catch (const std::bad_alloc& e)
+				{
+	//				ErrLog(<<"Fail to create an HTTP Server Connection Task!");
+					std::cout << "[Err] " << "Fail to create an HTTP Server Connection Task!" << std::endl;
+					connTcpServerSocket.close();
+					continue;
+				}
 
-			/* Add a TCP Server Connection Task to the Thread Pool. */
-			mpThreadPool->addTask(pTask);
-//			InfoLog(<<"Add a TCP Server Connection Task to the Thread Pool.");
-			std::cout << "[Info] " << "Add a TCP Server Connection Task to the Thread Pool." << std::endl;
+				/* Add a TCP Server Connection Task to the Thread Pool. */
+				threadPool.addTask(pTask);
+	//			InfoLog(<<"Add a TCP Server Connection Task to the Thread Pool.");
+				std::cout << "[Info] " << "Add a TCP Server Connection Task to the Thread Pool." << std::endl;
+			}
 		}
 	}
 
+	/* Shutdown all threads in the Thread Pool. */
+	threadPool.shutdownAll();
+	threadPool.joinAll();
+
 //	InfoLog(<<"TcpServerListenThread exit.");
 //	std::cout << "[Info] " << "TcpServerListenThread exit." << std::endl;
+}
+
+void TcpServerListenThread::shutdown()
+{
+	std::unique_lock<std::mutex> lock(mMutex);
+
+	if (!mShutdown)
+	{
+		mShutdown = true;
+		mCondition.notify_one();
+	}
+}
+
+bool TcpServerListenThread::isShutdown()
+{
+	std::unique_lock<std::mutex> lock(mMutex);
+
+	return mShutdown;
+}
+
+bool TcpServerListenThread::waitForShutdown(const S64 ms)
+{
+	std::unique_lock<std::mutex> lock(mMutex);
+
+	if (!mShutdown)
+	{
+		mCondition.wait_for(lock, std::chrono::milliseconds(ms));
+	}
+
+	return mShutdown;
 }
 
 /* End of File */

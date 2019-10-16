@@ -1,8 +1,8 @@
 #pragma once
 
+#include <mutex>
+#include <condition_variable>
 #include "ThreadIf.h"
-#include "TcpSocket.h"
-#include "ThreadPool.h"
 
 class TcpServerListenThread: public ThreadIf
 {
@@ -12,13 +12,19 @@ public:
 
 	virtual void start();
 	virtual void run();
+	void shutdown();
+	bool isShutdown();
+
+private:
+	bool waitForShutdown(const S64 ms);
 
 private:
 	U32 mIpVer;
 	std::string mLocalIpAddrStr;
 	U16 mLocalPortNumber;
-	TcpServerSocket mListenTcpServerSocket;
-	ThreadPool* mpThreadPool;
+	bool mShutdown;
+	mutable std::mutex mMutex;
+	mutable std::condition_variable mCondition;
 };
 
 /* End of File */

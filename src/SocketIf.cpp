@@ -71,6 +71,17 @@ STATUS SocketIf::shutdown(const S32 how)
 	return ShutdownSocket(mSocketId, how);
 }
 
+void SocketIf::reset()
+{
+	mSocketId = -1;
+	mRxBufLen = 0;
+	mTxBufLen = 0;
+	msLocalIpAddr.ver = 0;
+	mLocalIpAddrStr.clear();
+	mLocalPortNumber = 0;
+	mTos = 0;
+}
+
 STATUS SocketIf::setFlag(const U32 flag)
 {
 	return SetFlagToSocket(mSocketId, flag);
