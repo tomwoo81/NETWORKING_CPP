@@ -28,22 +28,6 @@ void PoolTaskIf::mSleep(const U16 ms)
 }
 
 
-void PoolThreadRun(PoolThread* const pThread)
-{
-	std::cout << "[Info] " << "PoolThread - enter" << std::endl;
-
-	if (nullptr == pThread)
-	{
-		std::cout << "[Err] " << "Pointer to the instance of PoolThread is NULL!" << std::endl;
-		std::cout << "[Info] " << "PoolThread - exit" << std::endl;
-		return;
-	}
-
-	pThread->run();
-
-	std::cout << "[Info] " << "PoolThread - exit" << std::endl;
-}
-
 PoolThread::PoolThread(ThreadPool* const pThreadPool)
 : mpThreadPool(pThreadPool), mpTask(nullptr)
 {
@@ -62,7 +46,7 @@ void PoolThread::start()
 {
 	try
 	{
-		mpThread = new std::thread(PoolThreadRun, this);
+		mpThread = new std::thread(std::bind(&PoolThread::run, this));
 	}
 	catch (const std::bad_alloc& e)
 	{
@@ -73,6 +57,8 @@ void PoolThread::start()
 
 void PoolThread::run()
 {
+	std::cout << "[Info] " << "PoolThread - enter" << std::endl;
+
 	std::thread::id tid = std::this_thread::get_id();
 
 	while (1)
@@ -97,6 +83,8 @@ void PoolThread::run()
 			break;
 		}
 	}
+
+	std::cout << "[Info] " << "PoolThread - exit" << std::endl;
 }
 
 
@@ -155,7 +143,7 @@ bool ThreadPool::getTask(PoolTaskIf*& pTask)
 	return true;
 }
 
-bool ThreadPool::isShutdown()
+bool ThreadPool::isShutdown() const
 {
 	std::unique_lock<std::mutex> lock(mMutex);
 

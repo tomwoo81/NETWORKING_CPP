@@ -8,22 +8,6 @@
 
 #define TCP_SERVER_THREAD_BUFFER_LENGTH (1 * 1024 * 1024) //1 MB
 
-void TcpServerListenThreadRun(TcpServerListenThread* const pThread)
-{
-	std::cout << "[Info] " << "TcpServerListenThread - enter" << std::endl;
-
-	if (nullptr == pThread)
-	{
-		std::cout << "[Err] " << "Pointer to the instance of TcpServerListenThread is NULL!" << std::endl;
-		std::cout << "[Info] " << "TcpServerListenThread - exit" << std::endl;
-		return;
-	}
-
-	pThread->run();
-
-	std::cout << "[Info] " << "TcpServerListenThread - exit" << std::endl;
-}
-
 TcpServerListenThread::TcpServerListenThread(const U32 ipVer, const std::string& localIpAddrStr, const U16 localPortNumber)
 : mIpVer(ipVer), mLocalIpAddrStr(localIpAddrStr), mLocalPortNumber(localPortNumber), mShutdown(false)
 {
@@ -37,7 +21,7 @@ void TcpServerListenThread::start()
 {
 	try
 	{
-		mpThread = new std::thread(TcpServerListenThreadRun, this);
+		mpThread = new std::thread(&TcpServerListenThread::run, this);
 	}
 	catch (const std::bad_alloc& e)
 	{
@@ -49,7 +33,7 @@ void TcpServerListenThread::start()
 void TcpServerListenThread::run()
 {
 //	InfoLog(<<"TcpServerListenThread start.");
-//	std::cout << "[Info] " << "TcpServerListenThread start." << std::endl;
+	std::cout << "[Info] " << "TcpServerListenThread start." << std::endl;
 
 	S32 ret;
 	S_IpAddr sIpAddr;
@@ -130,7 +114,7 @@ void TcpServerListenThread::run()
 	threadPool.joinAll();
 
 //	InfoLog(<<"TcpServerListenThread exit.");
-//	std::cout << "[Info] " << "TcpServerListenThread exit." << std::endl;
+	std::cout << "[Info] " << "TcpServerListenThread exit." << std::endl;
 }
 
 void TcpServerListenThread::shutdown()
@@ -144,14 +128,14 @@ void TcpServerListenThread::shutdown()
 	}
 }
 
-bool TcpServerListenThread::isShutdown()
+bool TcpServerListenThread::isShutdown() const
 {
 	std::unique_lock<std::mutex> lock(mMutex);
 
 	return mShutdown;
 }
 
-bool TcpServerListenThread::waitForShutdown(const S64 ms)
+bool TcpServerListenThread::waitForShutdown(const S64 ms) const
 {
 	std::unique_lock<std::mutex> lock(mMutex);
 

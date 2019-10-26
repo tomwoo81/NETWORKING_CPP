@@ -8,22 +8,6 @@
 
 #define TCP_CLIENT_THREAD_BUFFER_LENGTH (1 * 1024 * 1024) //1 MB
 
-void TcpClientThreadRun(TcpClientThread* const pThread)
-{
-	std::cout << "[Info] " << "TcpClientThread - enter" << std::endl;
-
-	if (nullptr == pThread)
-	{
-		std::cout << "[Err] " << "Pointer to the instance of TcpClientThread is NULL!" << std::endl;
-		std::cout << "[Info] " << "TcpClientThread - exit" << std::endl;
-		return;
-	}
-
-	pThread->run();
-
-	std::cout << "[Info] " << "TcpClientThread - exit" << std::endl;
-}
-
 TcpClientThread::TcpClientThread(const U32 ipVer, const std::string& localIpAddrStr, const U16 localPortNumber,
 		const std::string& remoteIpAddrStr, const U16 remotePortNumber)
 : mIpVer(ipVer), mLocalIpAddrStr(localIpAddrStr), mLocalPortNumber(localPortNumber),
@@ -39,7 +23,7 @@ void TcpClientThread::start()
 {
 	try
 	{
-		mpThread = new std::thread(TcpClientThreadRun, this);
+		mpThread = new std::thread(&TcpClientThread::run, this);
 	}
 	catch (const std::bad_alloc& e)
 	{
@@ -51,7 +35,7 @@ void TcpClientThread::start()
 void TcpClientThread::run()
 {
 //	InfoLog(<<"TcpClientThread start.");
-//	std::cout << "[Info] " << "TcpClientThread start." << std::endl;
+	std::cout << "[Info] " << "TcpClientThread start." << std::endl;
 
 	S32 ret;
 	TcpClientSocket socket;
@@ -111,7 +95,7 @@ void TcpClientThread::run()
 	}
 
 //	InfoLog(<<"TcpClientThread exit.");
-//	std::cout << "[Info] " << "TcpClientThread exit." << std::endl;
+	std::cout << "[Info] " << "TcpClientThread exit." << std::endl;
 }
 
 /* End of File */

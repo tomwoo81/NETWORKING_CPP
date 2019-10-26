@@ -48,7 +48,7 @@ public:
 
 	void addTask(PoolTaskIf* const pTask);
 	bool getTask(PoolTaskIf*& pTask);
-	bool isShutdown();
+	bool isShutdown() const;
 	void shutdownAll();
 	void joinAll();
 	U32 getPendingTaskNum() const;

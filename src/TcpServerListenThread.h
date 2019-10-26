@@ -13,10 +13,10 @@ public:
 	virtual void start();
 	virtual void run();
 	void shutdown();
-	bool isShutdown();
+	bool isShutdown() const;
 
 private:
-	bool waitForShutdown(const S64 ms);
+	bool waitForShutdown(const S64 ms) const;
 
 private:
 	U32 mIpVer;
