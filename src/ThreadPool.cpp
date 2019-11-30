@@ -61,7 +61,7 @@ void PoolThread::run()
 
 	std::thread::id tid = std::this_thread::get_id();
 
-	while (1)
+	while (true)
 	{
 		if (mpThreadPool->getTask(mpTask))
 		{
@@ -70,7 +70,7 @@ void PoolThread::run()
 //				InfoLog(<<"Thread "<<tid<<" will be busy.");
 				std::cout << "[Info] " << "Thread " << std::setiosflags(std::ios::showbase | std::ios::uppercase) << std::hex << tid << " will be busy." << std::endl;
 				mpTask->run();
-				delete mpTask; //Delete a task.
+				delete mpTask; // Delete a task.
 				mpTask = nullptr;
 //				InfoLog(<<"Thread "<<tid<<" will be idle.");
 				std::cout << "[Info] " << "Thread " << std::setiosflags(std::ios::showbase | std::ios::uppercase) << std::hex << tid << " will be idle." << std::endl;

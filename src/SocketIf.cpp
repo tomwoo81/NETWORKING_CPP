@@ -87,6 +87,22 @@ STATUS SocketIf::setFlag(const U32 flag)
 	return SetFlagToSocket(mSocketId, flag);
 }
 
+STATUS SocketIf::configWithBufLen(const U32 rcvBufLen, const U32 sndBufLen)
+{
+	S32 ret;
+
+	ret = ConfigSocketWithBufLen(mSocketId, rcvBufLen, sndBufLen);
+	if (STATUS_ERR == ret)
+	{
+		return STATUS_ERR;
+	}
+
+	mRxBufLen = rcvBufLen;
+	mTxBufLen = sndBufLen;
+
+	return STATUS_OK;
+}
+
 STATUS SocketIf::configWithAddrAndPort(const U32 ipVer, const std::string& ipAddrStr, const U16 portNumber)
 {
 	S32 ret;

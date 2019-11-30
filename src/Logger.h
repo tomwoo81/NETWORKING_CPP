@@ -1,7 +1,7 @@
 #ifndef _LOGGER_H_
 #define _LOGGER_H_
 
-#ifndef __cplusplus //C Programme
+#ifndef __cplusplus // C Programme
 
 #include <stdio.h>
 #include "CommonTypes.h"
@@ -43,10 +43,10 @@ void LogBufferToStream(S32 moduleId, S32 logLevel,
 		const char* pBuff, U32 buffLen,
 		U32 numPerLine);
 
-#else //C++ Programme
+#else // C++ Programme
 
-#endif //__cplusplus
+#endif // __cplusplus
 
-#endif //_LOGGER_H_
+#endif // _LOGGER_H_
 
 /* End of File */

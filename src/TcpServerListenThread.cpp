@@ -6,7 +6,7 @@
 #include "TcpServerConnTask.h"
 #include "TcpServerListenThread.h"
 
-#define TCP_SERVER_THREAD_BUFFER_LENGTH (1 * 1024 * 1024) //1 MB
+#define TCP_SERVER_THREAD_BUFFER_LENGTH (1 * 1024 * 1024) // 1 MB
 
 TcpServerListenThread::TcpServerListenThread(const U32 ipVer, const std::string& localIpAddrStr, const U16 localPortNumber)
 : mIpVer(ipVer), mLocalIpAddrStr(localIpAddrStr), mLocalPortNumber(localPortNumber), mShutdown(false)
@@ -47,7 +47,7 @@ void TcpServerListenThread::run()
 	/* Open a TCP Server Socket for listening. */
 	ret = listenTcpServerSocket.openAndConfig(mIpVer, O_NONBLOCK,
 			TCP_SERVER_THREAD_BUFFER_LENGTH, TCP_SERVER_THREAD_BUFFER_LENGTH,
-			"", 0); //Non-blocking I/O
+			"", 0); // Non-blocking I/O
 	if (STATUS_ERR == ret)
 	{
 //		ErrLog(<<"Fail to open a TCP Server Socket for listening!");
@@ -73,9 +73,9 @@ void TcpServerListenThread::run()
 		return;
 	}
 
-	while (!waitForShutdown(10)) //Wait for 10 ms.
+	while (!waitForShutdown(10)) // Wait for 10 ms.
 	{
-		while (1)
+		while (true)
 		{
 			/* Accept TCP client. */
 			ret = listenTcpServerSocket.accept(sIpAddr, portNumber, connTcpServerSocket);

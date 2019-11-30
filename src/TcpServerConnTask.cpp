@@ -4,7 +4,7 @@
 #include "MacroDefs.h"
 #include "TcpServerConnTask.h"
 
-#define TCP_SERVER_TASK_BUFFER_LENGTH (512 * 1024) //512 KB
+#define TCP_SERVER_TASK_BUFFER_LENGTH (512 * 1024) // 512 KB
 
 TcpServerConnTask::TcpServerConnTask(const TcpServerSocket& socket)
 : mSocket(socket)
@@ -24,11 +24,11 @@ void TcpServerConnTask::run()
 	U8 rxBuffer[TCP_SERVER_TASK_BUFFER_LENGTH];
 	std::string rxMsg, txMsg;
 
-	mSocket.setFlag(O_NONBLOCK); //Non-blocking I/O
+	mSocket.setFlag(O_NONBLOCK); // Non-blocking I/O
 
 	while (!mpThreadPool->isShutdown())
 	{
-		mSleep(10); //Wait for 10 ms.
+		mSleep(10); // Wait for 10 ms.
 
 		/* Check whether the TCP connection exists. */
 		ret = mSocket.isConnected(connected);
@@ -39,7 +39,7 @@ void TcpServerConnTask::run()
 			break;
 		}
 
-		while (1)
+		while (true)
 		{
 			ret = mSocket.recv(rxBuffer, TCP_SERVER_TASK_BUFFER_LENGTH, 0);
 			if (ret <= 0)

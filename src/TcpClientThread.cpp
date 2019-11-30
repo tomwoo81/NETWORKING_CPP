@@ -6,7 +6,7 @@
 #include "TcpSocket.h"
 #include "TcpClientThread.h"
 
-#define TCP_CLIENT_THREAD_BUFFER_LENGTH (1 * 1024 * 1024) //1 MB
+#define TCP_CLIENT_THREAD_BUFFER_LENGTH (1 * 1024 * 1024) // 1 MB
 
 TcpClientThread::TcpClientThread(const U32 ipVer, const std::string& localIpAddrStr, const U16 localPortNumber,
 		const std::string& remoteIpAddrStr, const U16 remotePortNumber)
@@ -46,7 +46,7 @@ void TcpClientThread::run()
 	/* Open and configure a TCP Client Socket with addr and port. */
 	ret = socket.openAndConfig(mIpVer, 0,
 			TCP_CLIENT_THREAD_BUFFER_LENGTH, TCP_CLIENT_THREAD_BUFFER_LENGTH,
-			mLocalIpAddrStr, mLocalPortNumber); //blocking I/O
+			mLocalIpAddrStr, mLocalPortNumber); // blocking I/O
 	if (STATUS_ERR == ret)
 	{
 //		ErrLog(<<"Fail to open and configure a TCP Client Socket with addr and port!");

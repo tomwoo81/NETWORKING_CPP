@@ -19,14 +19,17 @@
 extern "C" {
 #endif
 
-S32 OpenAndConfigSocket(const U32 ipVer, const S32 socketType, const U32 flag, const U32 rcvBufLen,
-		const U32 sndBufLen, const char* const pIpAddr, const U16 portNumber);
+S32 OpenAndConfigSocket(const U32 ipVer, const S32 socketType, const U32 flag,
+		const U32 rcvBufLen, const U32 sndBufLen,
+		const char* const pIpAddr, const U16 portNumber);
 
 STATUS CloseSocket(const S32 socketId);
 
 STATUS ShutdownSocket(const S32 socketId, const S32 how);
 
 STATUS SetFlagToSocket(const S32 socketId, const U32 flag);
+
+STATUS ConfigSocketWithBufLen(const S32 socketId, const U32 rcvBufLen, const U32 sndBufLen);
 
 STATUS ConfigSocketWithAddrAndPort(const S32 socketId, const U32 ipVer, const char* const pIpAddr, const U16 portNumber);
 

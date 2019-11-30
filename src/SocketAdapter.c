@@ -31,12 +31,11 @@
   Return:       Socket ID.
   Others:       None.
 ******************************************************************************/
-S32 OpenAndConfigSocket(const U32 ipVer, const S32 socketType, const U32 flag, const U32 rcvBufLen,
-		const U32 sndBufLen, const char* const pIpAddr, const U16 portNumber)
+S32 OpenAndConfigSocket(const U32 ipVer, const S32 socketType, const U32 flag,
+		const U32 rcvBufLen, const U32 sndBufLen,
+		const char* const pIpAddr, const U16 portNumber)
 {
-	S32 family, socketId, flags;
-    U32 actRcvBufLen, actSndBufLen;
-    socklen_t valLen = sizeof(U32);
+	S32 family, socketId;
 
 	if (NULL == pIpAddr)
 	{
@@ -67,55 +66,17 @@ S32 OpenAndConfigSocket(const U32 ipVer, const S32 socketType, const U32 flag, c
 	}
 
 	/* Set flag to the socket. */
-	if (STATUS_ERR == (flags = fcntl(socketId, F_GETFL, 0)))
+	if (STATUS_OK != SetFlagToSocket(socketId, flag))
 	{
-		LOG_ERROR(MODULE_ID_SOCKET, "Fail to get flags from the socket! (errNo = [-%d][%s])\n", errno, strerror(errno));
-		return STATUS_ERR;
-	}
-	if (STATUS_ERR == fcntl(socketId, F_SETFL, (flags | flag)))
-	{
-		LOG_ERROR(MODULE_ID_SOCKET, "Fail to set flags to the socket! (errNo = [-%d][%s])\n", errno, strerror(errno));
+		LOG_ERROR(MODULE_ID_SOCKET, "Fail to set flag to the socket!\n");
 		return STATUS_ERR;
 	}
 
-	/* Set the size of the socket-level receive buffer to be allocated. */
-	if (rcvBufLen > 0)
+	/* Set the size of the socket-level receive and send buffers to be allocated. */
+	if (STATUS_OK != ConfigSocketWithBufLen(socketId, rcvBufLen, sndBufLen))
 	{
-		if (STATUS_OK != setsockopt(socketId, SOL_SOCKET, SO_RCVBUF, &rcvBufLen, sizeof(U32)))
-		{
-			LOG_ERROR(MODULE_ID_SOCKET, "Fail to set the size of the socket-level receive buffer to be allocated!\n");
-			return STATUS_ERR;
-		}
-	}
-
-	/* Get and print the size of the socket-level receive buffer. */
-	if (STATUS_OK != getsockopt(socketId, SOL_SOCKET, SO_RCVBUF, &actRcvBufLen, &valLen))
-	{
-		LOG_WARN(MODULE_ID_SOCKET, "Fail to get the size of the socket-level receive buffer!\n");
-	}
-	else
-	{
-		LOG_DBG(MODULE_ID_SOCKET, "The size of the socket-level receive buffer: %u bytes.\n", actRcvBufLen);
-	}
-
-	/* Set the size of the socket-level send buffer to be allocated. */
-	if (sndBufLen > 0)
-	{
-		if (STATUS_OK != setsockopt(socketId, SOL_SOCKET, SO_SNDBUF, &sndBufLen, sizeof(U32)))
-		{
-			LOG_ERROR(MODULE_ID_SOCKET, "Fail to set the size of the socket-level send buffer to be allocated!\n");
-			return STATUS_ERR;
-		}
-	}
-
-	/* Get and print the size of the socket-level send buffer. */
-	if (STATUS_OK != getsockopt(socketId, SOL_SOCKET, SO_SNDBUF, &actSndBufLen, &valLen))
-	{
-		LOG_WARN(MODULE_ID_SOCKET, "Fail to get the size of the socket-level send buffer!\n");
-	}
-	else
-	{
-		LOG_DBG(MODULE_ID_SOCKET, "The size of the socket-level send buffer: %u bytes.\n", actSndBufLen);
+		LOG_ERROR(MODULE_ID_SOCKET, "Fail to set the size of the socket-level receive and send buffers to be allocated!\n");
+		return STATUS_ERR;
 	}
 
 	/* Populate local IP address and local port number. */
@@ -202,6 +163,64 @@ STATUS SetFlagToSocket(const S32 socketId, const U32 flag)
 	}
 
 	LOG_INFO(MODULE_ID_SOCKET, "Set a flag (%#X) to the socket (socket ID: %d) successfully.\n", flag, socketId);
+
+	return STATUS_OK;
+}
+
+/******************************************************************************
+  Function:     ConfigSocketWithBufLen()
+  Description:  .
+  Input:        .
+  Output:       .
+  Return:       Status.
+  Others:       None.
+******************************************************************************/
+STATUS ConfigSocketWithBufLen(const S32 socketId, const U32 rcvBufLen, const U32 sndBufLen)
+{
+    U32 actRcvBufLen, actSndBufLen;
+    socklen_t valLen = sizeof(U32);
+
+	/* Set the size of the socket-level receive buffer to be allocated. */
+	if (rcvBufLen > 0)
+	{
+		if (STATUS_OK != setsockopt(socketId, SOL_SOCKET, SO_RCVBUF, &rcvBufLen, sizeof(U32)))
+		{
+			LOG_ERROR(MODULE_ID_SOCKET, "Fail to set the size of the socket-level receive buffer to be allocated!\n");
+			return STATUS_ERR;
+		}
+	}
+
+	/* Get and print the size of the socket-level receive buffer. */
+	if (STATUS_OK != getsockopt(socketId, SOL_SOCKET, SO_RCVBUF, &actRcvBufLen, &valLen))
+	{
+		LOG_WARN(MODULE_ID_SOCKET, "Fail to get the size of the socket-level receive buffer!\n");
+	}
+	else
+	{
+		LOG_DBG(MODULE_ID_SOCKET, "The size of the socket-level receive buffer: %u bytes.\n", actRcvBufLen);
+	}
+
+	/* Set the size of the socket-level send buffer to be allocated. */
+	if (sndBufLen > 0)
+	{
+		if (STATUS_OK != setsockopt(socketId, SOL_SOCKET, SO_SNDBUF, &sndBufLen, sizeof(U32)))
+		{
+			LOG_ERROR(MODULE_ID_SOCKET, "Fail to set the size of the socket-level send buffer to be allocated!\n");
+			return STATUS_ERR;
+		}
+	}
+
+	/* Get and print the size of the socket-level send buffer. */
+	if (STATUS_OK != getsockopt(socketId, SOL_SOCKET, SO_SNDBUF, &actSndBufLen, &valLen))
+	{
+		LOG_WARN(MODULE_ID_SOCKET, "Fail to get the size of the socket-level send buffer!\n");
+	}
+	else
+	{
+		LOG_DBG(MODULE_ID_SOCKET, "The size of the socket-level send buffer: %u bytes.\n", actSndBufLen);
+	}
+
+	LOG_INFO(MODULE_ID_SOCKET, "Configure the socket (socket ID: %d) with buffer length successfully.\n", socketId);
 
 	return STATUS_OK;
 }

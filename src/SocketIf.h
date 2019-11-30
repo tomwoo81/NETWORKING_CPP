@@ -10,12 +10,14 @@ public:
 	SocketIf();
 	virtual ~SocketIf();
 
-	S32 openAndConfig(const U32 ipVer, const U32 flag, const U32 rcvBufLen,
-			const U32 sndBufLen, const std::string& ipAddrStr, const U16 portNumber);
+	S32 openAndConfig(const U32 ipVer, const U32 flag,
+			const U32 rcvBufLen, const U32 sndBufLen,
+			const std::string& ipAddrStr, const U16 portNumber);
 	STATUS close();
 	STATUS shutdown(const S32 how);
 	void reset();
 	STATUS setFlag(const U32 flag);
+	STATUS configWithBufLen(const U32 rcvBufLen, const U32 sndBufLen);
 	STATUS configWithAddrAndPort(const U32 ipVer, const std::string& ipAddrStr, const U16 portNumber);
 	STATUS configWithTos(const U8 tos);
 
