@@ -31,6 +31,8 @@ STATUS SetFlagToSocket(const S32 socketId, const U32 flag);
 
 STATUS ConfigSocketWithBufLen(const S32 socketId, const U32 rcvBufLen, const U32 sndBufLen);
 
+STATUS ConfigSocketAddrReusable(const S32 socketId);
+
 STATUS ConfigSocketWithAddrAndPort(const S32 socketId, const U32 ipVer, const char* const pIpAddr, const U16 portNumber);
 
 STATUS ConfigSocketWithTos(const S32 socketId, const U8 tos);

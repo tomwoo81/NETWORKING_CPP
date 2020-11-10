@@ -79,6 +79,13 @@ S32 OpenAndConfigSocket(const U32 ipVer, const S32 socketType, const U32 flag,
 		return STATUS_ERR;
 	}
 
+	/* Make address reusable. */
+	if (STATUS_OK != ConfigSocketAddrReusable(socketId))
+	{
+		LOG_ERROR(MODULE_ID_SOCKET, "Fail to make address reusable!\n");
+		return STATUS_ERR;
+	}
+
 	/* Populate local IP address and local port number. */
 	if (strlen(pIpAddr) > 0)
 	{
@@ -221,6 +228,29 @@ STATUS ConfigSocketWithBufLen(const S32 socketId, const U32 rcvBufLen, const U32
 	}
 
 	LOG_INFO(MODULE_ID_SOCKET, "Configure the socket (socket ID: %d) with buffer length successfully.\n", socketId);
+
+	return STATUS_OK;
+}
+
+/******************************************************************************
+  Function:     ConfigSocketAddrReusable()
+  Description:  .
+  Input:        .
+  Output:       .
+  Return:       Status.
+  Others:       None.
+******************************************************************************/
+STATUS ConfigSocketAddrReusable(const S32 socketId)
+{
+	S32 flag = 1;
+
+	if (STATUS_OK != setsockopt(socketId, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(S32)))
+	{
+		LOG_ERROR(MODULE_ID_SOCKET, "Fail to configure the address of the socket reusable! (errNo = [-%d][%s])\n", errno, strerror(errno));
+		return STATUS_ERR;
+	}
+
+	LOG_INFO(MODULE_ID_SOCKET, "Configure the address of the socket (socket ID: %d) reusable successfully.\n", socketId);
 
 	return STATUS_OK;
 }
