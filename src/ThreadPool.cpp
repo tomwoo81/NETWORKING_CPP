@@ -1,6 +1,7 @@
-//#include "rutil/Logger.hxx"
 #include <iostream>
 #include <iomanip>
+#include <functional>
+//#include "rutil/Logger.hxx"
 #include "ThreadPool.h"
 
 PoolTaskIf::PoolTaskIf()

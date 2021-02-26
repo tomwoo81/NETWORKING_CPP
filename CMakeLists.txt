@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.0.0)
+project(NETWORKING_CPP VERSION 1.0.2)
+aux_source_directory(src SOURCE_FILES)
+add_executable(NETWORKING_CPP ${SOURCE_FILES})
+target_link_libraries(NETWORKING_CPP pthread)
