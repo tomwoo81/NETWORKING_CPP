@@ -348,9 +348,9 @@ STATUS ConfigSocketWithTos(const S32 socketId, const U8 tos)
   Return:       Status.
   Others:       None.
 ******************************************************************************/
-STATUS ListenToTcpClients(const S32 socketId, const S32 maxNumConns)
+STATUS ListenToTcpClients(const S32 socketId, const S32 maxNumConnReqsInQue)
 {
-	if (STATUS_OK != listen(socketId, maxNumConns))
+	if (STATUS_OK != listen(socketId, maxNumConnReqsInQue))
 	{
 		LOG_ERROR(MODULE_ID_SOCKET, "Fail to transfer to Listen state on TCP server! (errNo = [-%d][%s])\n", errno, strerror(errno));
 		return STATUS_ERR;

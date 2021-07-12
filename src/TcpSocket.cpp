@@ -65,9 +65,9 @@ TcpServerSocket::~TcpServerSocket()
 {
 }
 
-STATUS TcpServerSocket::listen(const S32 maxNumConns)
+STATUS TcpServerSocket::listen(const S32 maxNumConnReqsInQue)
 {
-	return ListenToTcpClients(mSocketId, maxNumConns);
+	return ListenToTcpClients(mSocketId, maxNumConnReqsInQue);
 }
 
 S32 TcpServerSocket::accept(S_IpAddr& sIpAddr, U16& portNumber, TcpServerSocket& connTcpServerSocket)

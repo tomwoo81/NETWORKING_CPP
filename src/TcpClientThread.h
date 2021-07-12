@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+#include "CommonTypes.h"
 #include "ThreadIf.h"
 
 class TcpClientThread: public ThreadIf

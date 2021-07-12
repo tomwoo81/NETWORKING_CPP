@@ -37,7 +37,7 @@ STATUS ConfigSocketWithAddrAndPort(const S32 socketId, const U32 ipVer, const ch
 
 STATUS ConfigSocketWithTos(const S32 socketId, const U8 tos);
 
-STATUS ListenToTcpClients(const S32 socketId, const S32 maxNumConns);
+STATUS ListenToTcpClients(const S32 socketId, const S32 maxNumConnReqsInQue);
 
 STATUS ConnectTcpServer(const S32 socketId, const U32 ipVer, const char* const pIpAddr, const U16 portNumber);
 

@@ -1,7 +1,9 @@
 #pragma once
 
+#include <string>
 #include <mutex>
 #include <condition_variable>
+#include "CommonTypes.h"
 #include "ThreadIf.h"
 
 class TcpServerListenThread: public ThreadIf

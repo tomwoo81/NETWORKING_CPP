@@ -65,7 +65,7 @@ void TcpServerListenThread::run()
 	}
 
 	/* Transfer to Listen state on TCP server. */
-	ret = listenTcpServerSocket.listen(TCP_CONNECTIONS_MAX_NUM);
+	ret = listenTcpServerSocket.listen(MAX_NUM_TCP_CONN_REQS_IN_QUE);
 	if (STATUS_ERR == ret)
 	{
 //		ErrLog(<<"Fail to transfer to Listen state on TCP server!");

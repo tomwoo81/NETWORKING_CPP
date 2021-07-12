@@ -33,7 +33,7 @@ public:
 	TcpServerSocket();
 	virtual ~TcpServerSocket();
 
-	STATUS listen(const S32 maxNumConns);
+	STATUS listen(const S32 maxNumConnReqsInQue);
 	S32 accept(S_IpAddr& sIpAddr, U16& portNumber, TcpServerSocket& connTcpServerSocket);
 };
 
